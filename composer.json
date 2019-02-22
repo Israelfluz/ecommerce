@@ -1,8 +1,8 @@
 {
-    "name": "israelfluz/ecommerce",
+    "name": "Israelfluz/ecommerce",
     "authors": [
         {
-            "name": "Cyber Projects",
+            "name": "Isrelfluz",
             "email": "israelfaria.gtr@gmail.com"
         }
     ],
@@ -13,7 +13,7 @@
     },
     "autoload": {
         "psr-4": {
-            "": "vendor\\hcodebr\\php-classes\\src"
+            "Hcode\\": "vendor\\hcodebr\\php-classes\\src"
         }
     }
 }
