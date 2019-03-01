@@ -230,7 +230,7 @@ $app->get("/ecommerce/admin/categories", function(){
 
 	$page = new PageAdmin();
 	 
-	$page->setTpl("categories",
+	$page->setTpl("categories",[
 		'categories'=>$categories
 
 	]);
@@ -310,6 +310,21 @@ $app->post("/ecommerce/admin/categories/:idcategory/delete", function($idcategor
 	exit;
 
 }); 
+
+$app->get("/categories/:idcategory", function($idcategory){
+
+	$category = new Category();
+
+	$category->get((int)$idcategory);
+
+	$page = new Page();
+
+	$page->setTpl("category", [
+		'category'=>$category->getValues(),
+		'products'=>[]
+	]);
+
+});
 
 $app->run();
 
