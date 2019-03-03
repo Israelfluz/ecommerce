@@ -1,5 +1,4 @@
 <?php 
-
 session_start();
 require_once("vendor/autoload.php");
 
@@ -9,6 +8,7 @@ $app = new Slim();
 
 $app->config('debug', true);
 
+require_once("functions.php");
 require_once("site.php");
 require_once("admin.php");
 require_once("admin-users.php");
