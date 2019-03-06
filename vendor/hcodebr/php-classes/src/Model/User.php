@@ -97,7 +97,7 @@ class User extends Model {
 
 		if (User::ckeckLogin($inadmin)){
 
-			header("Location: /admin/login");
+			header("Location: /ecommerce/views/admin/login");
 			exit;
 
 		}

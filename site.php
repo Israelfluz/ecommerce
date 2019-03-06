@@ -70,7 +70,8 @@ $app->get("/cart", function(){
 
 	$page->setTpl("cart", [
 		'cart'=>$cart->getValues(),
-		'products'=>$cart->getProducts()
+		'products'=>$cart->getProducts(),
+		'error'=>Cart::getMsgError()
 	]);
 });
 
@@ -107,7 +108,7 @@ $app->get("/ecommerce/cart/:idproduct/minus", function($idproduct){
 
 	$cart->removeProduct($product);
 
-	header("Location: /ecommerce/cart");
+	header("Location: /ecommerce/views/cart");
 	exit;
 
 });
@@ -122,7 +123,18 @@ $app->get("/ecommerce/cart/:idproduct/remove", function($idproduct){
 
 	$cart->removeProduct($product, true);
 
-	header("Location: /ecommerce/cart");
+	header("Location: /ecommerce/views/cart");
+	exit;
+
+});
+
+$app->post("/ecommerce/views/cart/freight", function(){
+
+	$cart = Cart::getFromSession();
+
+	$cart->setFreight($_POST['zipcode']);
+
+	header("Location: /ecommerce/views/cart");
 	exit;
 
 });
