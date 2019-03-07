@@ -120,7 +120,7 @@ $app->get("/ecommerce/views/admin/categories/:idcategory/products/:idproduct/add
 
 	$category->get((int)$idcategory);
 
-	$product-> new Product();
+	$product = new Product();
 
 	$product->get((int)$idproduct);
 
@@ -139,7 +139,7 @@ $app->get("/ecommerce/views/admin/categories/:idcategory/products/:idproduct/rem
 
 	$category->get((int)$idcategory);
 
-	$product-> new Product();
+	$product = new Product();
 
 	$product->get((int)$idproduct);
 

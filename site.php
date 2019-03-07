@@ -4,6 +4,8 @@ use \Hcode\Page;
 use \Hcode\Model\Product;
 use \Hcode\Model\Category;
 use \Hcode\Model\Cart;
+use \Hcode\Model\Address;
+use \Hcode\Model\User;
 
 $app->get('/', function() {
 
@@ -91,8 +93,6 @@ $app->get("/ecommerce/cart/:idproduct/add", function($idproduct){
 
 	}
 
-	
-
 	header("Location: /ecommerce/cart");
 	exit;
 
@@ -135,6 +135,59 @@ $app->post("/ecommerce/views/cart/freight", function(){
 	$cart->setFreight($_POST['zipcode']);
 
 	header("Location: /ecommerce/views/cart");
+	exit;
+
+});
+
+$app->get("/ecommerce/views/checkout", function()
+
+	User::verifyLogin(false);
+
+	$cart = Cart::getFromSession();
+
+	$address = new Address();
+
+	$page = new Page();
+
+	$page->setTpl("checkout", [
+		'cart'=>$cart->getValues(),
+		'address'=>$address->getValues()
+	]);
+
+);
+
+$app->get("/ecommerce/views/login", function(){
+
+	$page = new Page();
+
+	$page->setTpl("login", [
+		'error'=>User::getError()
+	]);
+
+});
+
+$app->post("/ecommerce/views/login", function(){
+
+	try {
+
+		User::login($_POST['login'], $_POST['password']);
+
+	} catch(Exception $e) {
+
+		User::setError($e->getMessage());
+
+	}
+
+	header("Location: /ecommerce/views/checkout");
+	exit;
+
+});
+
+$app->get("/ecommerce/logout", function(){
+
+	User::logout();
+
+	header("Location: /ecommerce/views/login");
 	exit;
 
 });
