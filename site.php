@@ -139,22 +139,51 @@ $app->post("/ecommerce/views/cart/freight", function(){
 
 });
 
-$app->get("/ecommerce/views/checkout", function()
+$app->get("/ecommerce/views/checkout", function(){
 
 	User::verifyLogin(false);
 
+	
+	$address = new Address();
 	$cart = Cart::getFromSession();
 
-	$address = new Address();
+	if (!isset($_GET['zipcode'])) {
+
+		$_GET['zipcode'] = $cart->getdeszipcode();
+
+	}
+
+	if (isset($_GET['zipcode'])) {
+
+		$address->loadFromCEP($_GET['zipcode']);
+
+		$cart->setdeszipcode($_GET['zipcode']);
+
+		$cart->save();
+
+		$cart->getCalculateTotal();
+
+	}
+
+	if (!$address->getdesaddress()) $address->setdesaddress('');
+	if (!$address->getdesnumber()) $address->setdesnumber('');
+	if (!$address->getdescomplement()) $address->setdescomplement('');
+	if (!$address->getdesdistrict()) $address->setdesdistrict('');
+	if (!$address->getdescity()) $address->setdescity('');
+	if (!$address->getdesstate()) $address->setdesstate('');
+	if (!$address->getdescountry()) $address->setdescountry('');
+	if (!$address->getdeszipcode()) $address->setdeszipcode('');
 
 	$page = new Page();
 
 	$page->setTpl("checkout", [
 		'cart'=>$cart->getValues(),
-		'address'=>$address->getValues()
+		'address'=>$address->getValues(),
+		'products'=>$cart->getProducts(),
+		'error'=>Address::getMsgError()
 	]);
 
-);
+});
 
 $app->get("/ecommerce/views/login", function(){
 
@@ -224,11 +253,11 @@ $app->post("/ecommerce/register". function(){
 
 	if (User::checkLoginExist($_POST['email']) === true) {
 
-		User::setErrorRegister("Este endereço de e-mail já está sendo usado por outro usuário.);
+		User::setErrorRegister("Este endereço de e-mail já está sendo usado por outro usuário.");
 		header("Location: /ecommerce/views/login");
 		exit;
 
-	}
+	} 
 
 	$user = new User();
 
@@ -237,7 +266,7 @@ $app->post("/ecommerce/register". function(){
 		'deslogin'=>$_POST['email'],
 		'desperson'=>$_POST['name'],
 		'desemail'=>$_POST['email'],
-		'despassword'$_POST['password'],
+		'despassword'=>$_POST['password'],
 		'nrphone'=>$_POST['phone']
 	]);
 
@@ -245,8 +274,69 @@ $app->post("/ecommerce/register". function(){
 
 	User::login($_POST['email'], $_POST['password']);
 
-	header('Location: /ecommerce/checkout');
+	header("Location: /ecommerce/checkout");
 	exit;
+
 });
+
+$app->get("/ecommerce/views/forgot", function(){
+
+	$page = new Page();
+
+	$page->setTpl("forgot"); 
+
+});
+
+$app->post("/ecommerce/views/forgot", function(){
+
+	$user = User::getForgot($_POST["email"], false);
+
+	header("Location: /ecommerce/views/forgot/sent");
+	exit;
+
+});
+
+$app->get("/ecommerce/views/forgot/sent", function(){
+
+	$page = new Page();
+
+	$page->setTpl("forgot-send"); 
+
+});
+
+$app->get("/ecommerce/views/forgot/reset", function(){
+
+	$user = User::validForgotDecrypt($_GET["code"]);
+
+	$page = new Page();
+
+	$page->setTpl("forgot-reset", array(
+		"name"=>$user["desperson"],
+		"code"=>$_GET["code"]
+	)); 
+
+});
+
+$app->post("/ecommerce/views/forgot/reset", function(){
+
+	$forgot = User::validForgotDecrypt($_POST["code"]);
+
+	User::setforgotUsed($forgot["idrecovery"]);
+
+	$user = new User();
+
+	$user->get((int)$forgot["iduser"]);
+
+	$password = password_hash($_POST["password"], PASSWORD_DEFAULT, [
+		"cost"=>12
+	]);
+
+	$user->setPassword($password);
+ 
+	$page = new Page();
+
+	$page->setTpl("forgot-reset-success");
+
+	});
 
 ?>
