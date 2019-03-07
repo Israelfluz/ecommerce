@@ -12,6 +12,7 @@ class User extends Model {
 	const SECRET = "HcodePhp7_Secret";
 	const ERROR = "UserError";
 	const ERROR_REGISTER = "UserErrorRegister";
+	const SUCCESS = "UserSucesss";
 
 	public static function getFromSession()
 	{
@@ -348,48 +349,150 @@ class User extends Model {
 
 	public static function setSuccess($msg)
 	{
+
 		$_SESSION[User::SUCCESS] = $msg;
+
 	}
+
 	public static function getSuccess()
 	{
+
 		$msg = (isset($_SESSION[User::SUCCESS]) && $_SESSION[User::SUCCESS]) ? $_SESSION[User::SUCCESS] : '';
+
 		User::clearSuccess();
+
 		return $msg;
+
 	}
+
 	public static function clearSuccess()
 	{
+
 		$_SESSION[User::SUCCESS] = NULL;
+
 	}
+
 	public static function setErrorRegister($msg)
 	{
+
 		$_SESSION[User::ERROR_REGISTER] = $msg;
+
 	}
+
 	public static function getErrorRegister()
 	{
+
 		$msg = (isset($_SESSION[User::ERROR_REGISTER]) && $_SESSION[User::ERROR_REGISTER]) ? $_SESSION[User::ERROR_REGISTER] : '';
+
 		User::clearErrorRegister();
+
 		return $msg;
+
 	}
+
 	public static function clearErrorRegister()
 	{
+
 		$_SESSION[User::ERROR_REGISTER] = NULL;
+
 	}
+
 	public static function checkLoginExist($login)
 	{
+		
 		$sql = new Sql();
+
 		$results = $sql->select("SELECT * FROM tb_users WHERE deslogin = :deslogin", [
 			':deslogin'=>$login
 		]);
+
 		return (count($results) > 0);
 
 	}
 
 	public static function getPasswordHash($password)
 	{
+
 		return password_hash($password, PASSWORD_DEFAULT, [
 			'cost'=>12
 		]);
-	}	
+
+	}
+
+	public function getOrders()
+	{
+
+		$sql = new Sql();
+
+		$results = $sql->select("
+			SELECT * 
+			FROM tb_orders a 
+			INNER JOIN tb_ordersstatus b USING(idstatus) 
+			INNER JOIN tb_carts c USING(idcart)
+			INNER JOIN tb_users d ON d.iduser = a.iduser
+			INNER JOIN tb_addresses e USING(idaddress)
+			INNER JOIN tb_persons f ON f.idperson = d.idperson
+			WHERE a.iduser = :iduser
+		", [
+			':iduser'=>$this->getiduser()
+		]);
+
+		return $results;
+
+	}
+
+	public static function getPage($page = 1, $itemsPerPage = 10)
+	{
+		
+		$start = ($page - 1) * $itemsPerPage;
+
+		$sql = new Sql();
+
+		$results = $sql->select("
+			SELECT SQL_CALC_FOUND_ROWS *
+			FROM tb_users a 
+			INNER JOIN tb_persons b USING(idperson) 
+			ORDER BY b.desperson
+			LIMIT $start, $itemsPerPage;
+		");
+
+		$resultTotal = $sql->select("SELECT FOUND_ROWS() AS nrtotal;");
+
+		return [
+			'data'=>$results,
+			'total'=>(int)$resultTotal[0]["nrtotal"],
+			'pages'=>ceil($resultTotal[0]["nrtotal"] / $itemsPerPage)
+		];
+
+	}
+
+	public static function getPageSearch($search, $page = 1, $itemsPerPage = 10)
+	{
+
+		$start = ($page - 1) * $itemsPerPage;
+
+		$sql = new Sql();
+
+		$results = $sql->select("
+			SELECT SQL_CALC_FOUND_ROWS *
+			FROM tb_users a 
+			INNER JOIN tb_persons b USING(idperson)
+			WHERE b.desperson LIKE :search OR b.desemail = :search OR a.deslogin LIKE :search
+			ORDER BY b.desperson
+			LIMIT $start, $itemsPerPage;
+		", [
+			':search'=>'%'.$search.'%'
+		]);
+
+		$resultTotal = $sql->select("SELECT FOUND_ROWS() AS nrtotal;");
+
+		return [
+			'data'=>$results,
+			'total'=>(int)$resultTotal[0]["nrtotal"],
+			'pages'=>ceil($resultTotal[0]["nrtotal"] / $itemsPerPage)
+		];
+
+	} 	
 
 }
 
