@@ -239,7 +239,7 @@ class User extends Model {
 
 				if ($inadmin === true) {
 
-						$link = "http://www.hcodecommerce.com.br/ecommerce/admin/forgot.reset?code=$code";
+						$link = "http://www.hcodecommerce.com.br/ecommerce/views/admin/forgot.reset?code=$code";
 
 				} else {
 
