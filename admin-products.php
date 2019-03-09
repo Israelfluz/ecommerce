@@ -8,12 +8,42 @@ $app->get("ecommerce/admin/products", function(){
 
 	User::verifyLogin();
 
+	$search = (isset($_GET['search'])) ? $_GET['search'] : "";
+	$page = (isset($_GET['page'])) ? (int)$_GET['page'] : 1;
+
+	if ($search != '') {
+
+		$pagination = Product::getPageSearch($search, $page);
+
+	} else {
+
+		$pagination = Product::getPage($page);
+
+	}
+
+	$pages = [];
+
+	for ($x = 0; $x < $pagination['pages']; $x++)
+	{
+
+		array_push($pages, [
+			'href'=>'/admin/products?'.http_build_query([
+				'page'=>$x+1,
+				'search'=>$search
+			]),
+			'text'=>$x+1
+		]);
+	
+	}
+
 	$products = Products::listAll();
 
 	$page = new PageAdmin();
 
 	$page->$setTpl("products", [
-		"products"=>$products
+		"products"=>$pagination['data'],
+		"search"=>$search,
+		"pages"=>$pages
 	]);
 
 });
@@ -76,7 +106,6 @@ $app->post("ecommerce/admin/products/:idproduct", function($idproduct){
 	header("Location: /ecommerce/admin/products");
 	exit;
 
-
 });
 
 $app->post("ecommerce/admin/products/:idproduct/delete", function($idproduct){
@@ -92,9 +121,6 @@ $app->post("ecommerce/admin/products/:idproduct/delete", function($idproduct){
 	header("Location: /ecommerce/admin/products");
 	exit;
 
-
 });
-
-
 
 ?>
