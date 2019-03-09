@@ -1,4 +1,5 @@
-<?php 
+<?php
+ 
 use \Hcode\Model\User;
 use \Hcode\Model\Cart;
 

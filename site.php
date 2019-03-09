@@ -38,7 +38,6 @@ $app->get("/ecommerce/categories/:idcategory", function($idcategory){
 			'link'=>'/ecommerce/categories/' .$category->getidcategory().'pages='.$i,
 			'pages'=>$i
 		]);
-
 	}
 
 	$page = new Page();
@@ -77,6 +76,7 @@ $app->get("/cart", function(){
 		'products'=>$cart->getProducts(),
 		'error'=>Cart::getMsgError()
 	]);
+
 });
 
 $app->get("/ecommerce/cart/:idproduct/add", function($idproduct){
@@ -144,12 +144,10 @@ $app->post("/ecommerce/views/cart/freight", function(){
 $app->get("/ecommerce/views/checkout", function(){
 
 	User::verifyLogin(false);
-
 	
 	$address = new Address();
 	$cart = Cart::getFromSession();
 
-	
 	if (!isset($_GET['zipcode'])) {
 
 		$_GET['zipcode'] = $cart->getdeszipcode();
@@ -157,12 +155,6 @@ $app->get("/ecommerce/views/checkout", function(){
 	}
 
 	if (!isset($_GET['zipcode'])) {
-
-		$_GET['zipcode'] = $cart->getdeszipcode();
-
-	}
-
-	if (isset($_GET['zipcode'])) {
 
 		$address->loadFromCEP($_GET['zipcode']);
 
@@ -203,26 +195,31 @@ $app->post("/ecommerce/views/checkout", function(){
 		header('Location: /ecommerce/views/checkout');
 		exit;
 	}
+
 	if (!isset($_POST['desaddress']) || $_POST['desaddress'] === '') {
 		Address::setMsgError("Informe o endereço.");
 		header('Location: /ecommerce/views/checkout');
 		exit;
 	}
+
 	if (!isset($_POST['desdistrict']) || $_POST['desdistrict'] === '') {
 		Address::setMsgError("Informe o bairro.");
 		header('Location: /ecommerce/views/checkout');
 		exit;
 	}
+
 	if (!isset($_POST['descity']) || $_POST['descity'] === '') {
 		Address::setMsgError("Informe a cidade.");
 		header('Location: /ecommerce/views/checkout');
 		exit;
 	}
+
 	if (!isset($_POST['desstate']) || $_POST['desstate'] === '') {
 		Address::setMsgError("Informe o estado.");
 		header('Location: /ecommerce/views/checkout');
 		exit;
 	}
+
 	if (!isset($_POST['descountry']) || $_POST['descountry'] === '') {
 		Address::setMsgError("Informe o país.");
 		header('Location: /ecommerce/views/checkout');
@@ -246,21 +243,29 @@ $app->post("/ecommerce/views/checkout", function(){
 
 	$order = new Order();
 
-	$cart->getCalculateTotal();
-
 	$order->setData([
 		'idcart'=>$cart->getidcart(),
 		'idaddress'=>$address->getidaddress(),
 		'iduser'=>$user->getiduser(),
 		'idstatus'=>OrderStatus::EM_ABERTO,
 		'vltotal'=>$cart->getvltotal()
-
 	]);
 
-	header("Location: /ecommerce/vendor/hcodebr/php-classes/src/Model/order/".$order->getidorder());
-	exit;
-
 	$order->save();
+
+	switch ((int)$_POST['payment-method']) {
+
+		case 1:
+		header("Location: /order/".$order->getidorder()."/pagseguro");
+		break;
+
+		case 2:
+		header("Location: /order/".$order->getidorder()."/paypal");
+		break;
+
+	}
+	
+	exit;
 
 });
 
@@ -677,7 +682,7 @@ $app->post("/ecommerce/views/profile/change-password", function(){
 
 	header("Location: /ecommerce/views/profile/change-password");
 	exit;
-	
+
 });
 
 
