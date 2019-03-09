@@ -242,6 +242,8 @@ $app->post("/ecommerce/views/checkout", function(){
 
 	$cart = Cart::getFromSession();
 
+	$totals - $cart->getCalculateTotal();  
+
 	$order = new Order();
 
 	$cart->getCalculateTotal();
@@ -560,11 +562,50 @@ $app->get("/boleto/:idorder", function($idorder){
 
 	// NÃO ALTERAR!
 	$path = $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . "res" . DIRECTORY_SEPARATOR . "boletophp" . DIRECTORY_SEPARATOR . "include" . DIRECTORY_SEPARATOR;
-	
+
 	require_once($path . "funcoes_itau.php");
 	require_once($path . "layout_itau.php");
 
 });
 
+$app->get("/ecommerce/views/profile/orders", function(){
+
+	User::verifyLogin(false);
+
+	$user = User::getFromSession();
+
+	$page = new Page();
+
+	$page->setTpl("profile-orders", [
+		'orders'=>$user->getOrders()
+
+	]);
+
+});
+
+$app->get("/ecommerce/views/profile/orders/:idorder", function($idorder){
+
+	User::verifyLogin(false);
+
+	$order = new Order();
+
+	$order->get((int)$idorder);
+
+	$cart = new Cart();
+
+	$cart->get((int)$order->getidcart());
+
+	$cart->getCalculateTotal();
+
+	$page = new Page();
+
+	$page->setTpl("profile-orders-detail", [
+		'order'=>$order->getValues(),
+		'cart'=>$cart->getValues(),
+		'products'=>$cart->getProducts()
+
+	]);	
+
+});
 
 ?>
