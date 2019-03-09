@@ -7,16 +7,44 @@ use \Hcode\Model\Product;
 
 $app->get("/ecommerce/views/admin/categories", function(){
 
-	User::verifylogin();
+	User::verifyLogin();
 
-	$categories - Category::listAll();
+	$search = (isset($_GET['search'])) ? $_GET['search'] : "";
+	$page = (isset($_GET['page'])) ? (int)$_GET['page'] : 1;
+
+	if ($search != '') {
+
+		$pagination = Category::getPageSearch($search, $page);
+
+	} else {
+
+		$pagination = Category::getPage($page);
+
+	}
+
+	$pages = [];
+
+	for ($x = 0; $x < $pagination['pages']; $x++)
+	{
+
+		array_push($pages, [
+			'href'=>'/ecommerce/views/admin/categories?'.http_build_query([
+				'page'=>$x+1,
+				'search'=>$search
+			]),
+			'text'=>$x+1
+		]);
+
+	}
 
 	$page = new PageAdmin();
-	 
-	$page->setTpl("categories",[
-		'categories'=>$categories
 
+	$page->setTpl("categories", [
+		"categories"=>$pagination['data'],
+		"search"=>$search,
+		"pages"=>$pages
 	]);
+
 
 });
 
@@ -75,7 +103,6 @@ $app->get("/ecommerce/views/admin/categories/:idcategory/delete", function($idca
 	]);
 
 }); 
-
 
 $app->post("/ecommerce/views/admin/categories/:idcategory/delete", function($idcategory){
 
@@ -148,5 +175,6 @@ $app->get("/ecommerce/views/admin/categories/:idcategory/products/:idproduct/rem
 	header("Location: /ecommerce/views/admin/categories/".$idcategory."/products");
 	exit; 
 
-}); 
+});
+ 
 ?>
