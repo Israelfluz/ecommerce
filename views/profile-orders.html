@@ -42,8 +42,8 @@
                             <td>{$value.desstatus}</td>
                             <td>{$value.desaddress}, {$value.desdistrict}, {$value.descity} - , {$value.desstate} CEP: {$value.deszipcode}</td>
                             <td style="width:222px;">
-                                <a class="btn btn-success" href="/order/{$value.idorder}" role="button">Imprimir Boleto</a>
-                                <a class="btn btn-default" href="/profile/orders/{$value.idorder}" role="button">Detalhes</a>
+                                <a class="btn btn-success" href="/ecommerce/vendor/hcodebr/php-classes/src/Model/order/{$value.idorder}" role="button">Imprimir Boleto</a>
+                                <a class="btn btn-default" href="/ecommerce/views/profile/orders/{$value.idorder}" role="button">Detalhes</a>
                             </td>
                         </tr>
                         {else}
