@@ -165,6 +165,7 @@ class Order extends Model {
 		");
 
 		$resultTotal = $sql->select("SELECT FOUND_ROWS() AS nrtotal;");
+
 		return [
 			'data'=>$results,
 			'total'=>(int)$resultTotal[0]["nrtotal"],
@@ -197,11 +198,13 @@ class Order extends Model {
 		]);
 		
 		$resultTotal = $sql->select("SELECT FOUND_ROWS() AS nrtotal;");
+
 		return [
 			'data'=>$results,
 			'total'=>(int)$resultTotal[0]["nrtotal"],
 			'pages'=>ceil($resultTotal[0]["nrtotal"] / $itemsPerPage)
 		];
+		 
 	}
 
 }
