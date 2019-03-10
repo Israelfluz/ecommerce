@@ -4,43 +4,66 @@ use \Hcode\PageAdmin;
 use \Hcode\Model\User;
 
 $app->get("/admin/users/:iduser/password", function($iduser){
+
 	User::verifyLogin();
+
 	$user = new User();
+
 	$user->get((int)$iduser);
+
 	$page = new PageAdmin();
+
 	$page->setTpl("users-password", [
 		"user"=>$user->getValues(),
 		"msgError"=>User::getError(),
 		"msgSuccess"=>User::getSuccess()
 	]);
+
 });
+
 $app->post("/admin/users/:iduser/password", function($iduser){
+
 	User::verifyLogin();
+
 	if (!isset($_POST['despassword']) || $_POST['despassword']==='') {
+
 		User::setError("Preencha a nova senha.");
-		header("Location: /admin/users/$iduser/password");
+		header("Location: /ecommerce/admin/users/$iduser/password");
 		exit;
+
 	}
+
 	if (!isset($_POST['despassword-confirm']) || $_POST['despassword-confirm']==='') {
+
 		User::setError("Preencha a confirmação da nova senha.");
-		header("Location: /admin/users/$iduser/password");
+		header("Location: /ecommerce/admin/users/$iduser/password");
 		exit;
+
 	}
+
 	if ($_POST['despassword'] !== $_POST['despassword-confirm']) {
+
 		User::setError("Confirme corretamente as senhas.");
-		header("Location: /admin/users/$iduser/password");
+		header("Location: /ecommerce/admin/users/$iduser/password");
 		exit;
+
 	}
+
 	$user = new User();
+
 	$user->get((int)$iduser);
+
 	$user->setPassword(User::getPasswordHash($_POST['despassword']));
+
 	User::setSuccess("Senha alterada com sucesso.");
-	header("Location: /admin/users/$iduser/password");
+
+	header("Location: /ecommerce/admin/users/$iduser/password");
 	exit;
 
 });
 
-$app->get("admin/users", function(){
+
+$app->get("/admin/users", function(){
 
 	User::verifylogin();
 
@@ -69,8 +92,11 @@ $app->get("admin/users", function(){
 			]),
 			'text'=>$x+1
 		]);
+
 	}
+
 	$page = new PageAdmin();
+
 	$page->setTpl("users", array(
 		"users"=>$pagination['data'],
 		"search"=>$search,
@@ -79,7 +105,7 @@ $app->get("admin/users", function(){
 
 });
 
-$app->get("admin/users/create", function(){
+$app->get("/admin/users/create", function(){
 
 	User::verifylogin();
 
@@ -104,7 +130,7 @@ $app->delete("/admin/users/:iduser/delete", function($iduser) {
 
 });
 
-$app->get("admin/users/:iduser", function($iduser){
+$app->get("/admin/users/:iduser", function($iduser){
 
 	User::verifylogin();
 
@@ -127,6 +153,8 @@ $app->post("/admin/users/create", function() {
 	$user = new User();
 
 	$_POST["inadmin"] = (isset($_POST["inadmin"]))?1:0;
+
+	$_POST['despassword'] = User::getPassswordHash($_POST['despassword']);
 
 	$user->setData($_POST);
 
@@ -155,6 +183,5 @@ $app->post("/admin/users/:iduser", function($iduser) {
 	exit;
 
 });
-
 
 ?>

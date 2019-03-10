@@ -65,7 +65,7 @@ $app->get("/ecommerce/products/:desurl", function($desurl){
 
 });
 
-$app->get("/cart", function(){
+$app->get("/ecommerce/cart", function(){
 
 	$cart = Cart::getFromSession();
 
@@ -264,8 +264,60 @@ $app->post("/ecommerce/views/checkout", function(){
 		break;
 
 	}
-	
+
 	exit;
+
+});
+
+$app->get("/order/:idorder/pagseguro", function($idorder){
+
+	User::verifyLogin(false);
+
+	$order = new Order();
+
+	$order->get((int)$idorder);
+
+	$cart = $order->getCart();
+
+	$page = new Page([
+		'header'=>false,
+		'footer'=>false
+	]);
+
+	$page->setTpl("payment-pagseguro", [
+		'order'=>$order->getValues(),
+		'cart'=>$cart->getValues(),
+		'products'=>$cart->getProducts(),
+		'phone'=>[
+			'areaCode'=>substr($order->getnrphone(), 0, 2),
+			'number'=>substr($order->getnrphone(), 2, strlen($order->getnrphone()))
+		]
+	]);
+
+
+});
+
+$app->get("/order/:idorder/paypal", function($idorder){
+
+	User::verifyLogin(false);
+
+	$order = new Order();
+
+	$order->get((int)$idorder);
+
+	$cart = $order->getCart();
+
+	$page = new Page([
+		'header'=>false,
+		'footer'=>false
+	]);
+
+	$page->setTpl("payment-paypal", [
+		'order'=>$order->getValues(),
+		'cart'=>$cart->getValues(),
+		'products'=>$cart->getProducts()
+	]);
+
 
 });
 
@@ -388,6 +440,7 @@ $app->get("/ecommerce/views/forgot/sent", function(){
 
 });
 
+
 $app->get("/ecommerce/views/forgot/reset", function(){
 
 	$user = User::validForgotDecrypt($_GET["code"]);
@@ -411,9 +464,7 @@ $app->post("/ecommerce/views/forgot/reset", function(){
 
 	$user->get((int)$forgot["iduser"]);
 
-	$password = password_hash($_POST["password"], PASSWORD_DEFAULT, [
-		"cost"=>12
-	]);
+	$password = password_hash($_POST["password"]);
 
 	$user->setPassword($password);
  
@@ -583,7 +634,6 @@ $app->get("/ecommerce/views/profile/orders", function(){
 
 	$page->setTpl("profile-orders", [
 		'orders'=>$user->getOrders()
-
 	]);
 
 });
@@ -608,7 +658,6 @@ $app->get("/ecommerce/views/profile/orders/:idorder", function($idorder){
 		'order'=>$order->getValues(),
 		'cart'=>$cart->getValues(),
 		'products'=>$cart->getProducts()
-
 	]);	
 
 });
@@ -622,7 +671,6 @@ $app->get("/ecommerce/views/profile/change-password", function(){
 	$page->setTpl("profile-change-password", [
 		'changePassError'=>User::getError(),
 		'changePassSuccess'=>User::getSuccess()
-
 	]);
 
 });
@@ -642,7 +690,6 @@ $app->post("/ecommerce/views/profile/change-password", function(){
 	if (!isset($_POST['new_pass']) || $_POST['new_pass'] === '') {
 
 		User::setError("Digite a nova senha.");
-
 		header("Location: /ecommerce/views/profile/change-password");
 		exit;
 
