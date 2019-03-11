@@ -12,12 +12,9 @@
 
                 <script>
                 document.querySelector("#btn-print").addEventListener("click", function(event){
-
                     event.preventDefault();
-
                     window.frames["boleto"].focus();
                     window.frames["boleto"].print();
-
                 });                
                 </script>
 
